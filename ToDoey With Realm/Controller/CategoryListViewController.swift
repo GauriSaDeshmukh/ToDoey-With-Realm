@@ -12,7 +12,7 @@ import RealmSwift
 class CategoryListViewController: UITableViewController {
     
     let realm = try! Realm()
-    var categoryArray: Results<Category>?
+    var categories: Results<Category>?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -27,16 +27,40 @@ class CategoryListViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         
-        return categoryArray?.count ?? 1
+        return categories?.count ?? 1
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "categoryCell", for: indexPath)
         
-        cell.textLabel?.text = categoryArray?[indexPath.row].name ?? "No Category Available"
+        cell.textLabel?.text = categories?[indexPath.row].name ?? "No Category Available"
         
         return cell
+        
+    }
+    
+    //MARK: - TableView Delegate Methods
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+       
+        //if categories?.count != 0
+        //{
+            performSegue(withIdentifier: "toDoItemList", sender: self)
+       // }
+        
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        
+        if segue.identifier == "toDoItemList"
+        {
+            let vc = segue.destination as! ItemListTableViewController
+            
+            if let indexPath = tableView.indexPathForSelectedRow
+            {
+                vc.selectedCategory = categories?[indexPath.row]
+            }
+        }
         
     }
     
@@ -69,7 +93,7 @@ class CategoryListViewController: UITableViewController {
         
         alert.addTextField { (textField) in
             
-            textField.placeholder = "Add New Category"
+            textField.placeholder = "Create New Category"
             categoryTextField = textField
             
         }
@@ -83,7 +107,7 @@ class CategoryListViewController: UITableViewController {
     
     func loadCategories()
     {
-        categoryArray = realm.objects(Category.self)
+        categories = realm.objects(Category.self)
         tableView.reloadData()
     }
 }
