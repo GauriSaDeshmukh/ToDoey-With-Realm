@@ -87,7 +87,7 @@ class ItemListTableViewController: UITableViewController {
                         
                         let newitem = Items()
                         newitem.title = itemTextField.text!
-                        newitem.dateCreated = self.getCurrentDateInSring()
+                        newitem.dateCreated = Date()
                         currentCategory.item.append(newitem)
                     }
                 }
@@ -117,18 +117,6 @@ class ItemListTableViewController: UITableViewController {
         tableView.reloadData()
     }
     
-    //MARK: - Get current date
-    
-    func getCurrentDateInSring() -> String
-    {
-        let dateFormatter = DateFormatter()
-        
-        dateFormatter.dateStyle = .full
-        
-        dateFormatter.timeStyle = .full
-        
-        return dateFormatter.string(from: Date())
-    }
 }
 
 extension ItemListTableViewController: UISearchBarDelegate
