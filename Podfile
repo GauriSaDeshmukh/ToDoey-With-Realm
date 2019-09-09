@@ -5,6 +5,5 @@ target 'ToDoey With Realm' do
   # Comment the next line if you don't want to use dynamic frameworks
   use_frameworks!
 pod 'RealmSwift'
-  # Pods for ToDoey With Realm
-
+pod 'SwipeCellKit'
 end
