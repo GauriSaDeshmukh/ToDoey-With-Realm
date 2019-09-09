@@ -8,6 +8,7 @@
 
 import UIKit
 import RealmSwift
+import SwipeCellKit
 
 class ItemListTableViewController: UITableViewController {
     
@@ -34,7 +35,9 @@ class ItemListTableViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: "itemCell", for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: "itemCell", for: indexPath) as! SwipeTableViewCell
+        
+        cell.delegate = self
         
         if let toDoItem = itemsObject?[indexPath.row]
         {
@@ -69,6 +72,7 @@ class ItemListTableViewController: UITableViewController {
         tableView.deselectRow(at: indexPath, animated: true)
         tableView.reloadData()
     }
+    
     
     //MARK: - Add New Item
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
@@ -119,8 +123,11 @@ class ItemListTableViewController: UITableViewController {
     
 }
 
-extension ItemListTableViewController: UISearchBarDelegate
+extension ItemListTableViewController: UISearchBarDelegate, SwipeTableViewCellDelegate
 {
+    
+    //MARK: - SearchBar Mrthods
+    
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         
         itemsObject = selectedCategory?.item.filter("title CONTAINS[cd] %@", searchBar.text!).sorted(byKeyPath: "dateCreated", ascending: true)
@@ -144,6 +151,32 @@ extension ItemListTableViewController: UISearchBarDelegate
         
     }
     
+    //MARK:- SwipeTableViewCell Delegate Method
     
-    
+    func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath, for orientation: SwipeActionsOrientation) -> [SwipeAction]? {
+        guard orientation == .right else { return nil }
+        
+        let deleteAction = SwipeAction(style: .destructive, title: "Delete") { action, indexPath in
+            // handle action by updating model with deletion
+            if let item = self.itemsObject?[indexPath.row]
+            {
+                do{
+                    try self.realm.write {
+                        
+                        self.realm.delete(item)
+                    }
+                }
+                catch
+                {
+                    print("Error in saving done \(error)")
+                }
+            }
+            tableView.reloadData()
+        }
+        
+        // customize the action appearance
+        deleteAction.image = UIImage(named: "delete")
+        
+        return [deleteAction]
+    }
 }

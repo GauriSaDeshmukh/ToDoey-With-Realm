@@ -9,7 +9,7 @@
 import UIKit
 import RealmSwift
 
-class CategoryListViewController: UITableViewController {
+class CategoryListViewController: SwipeTableViewController {
     
     let realm = try! Realm()
     var categories: Results<Category>?
@@ -20,7 +20,7 @@ class CategoryListViewController: UITableViewController {
         
         loadCategories()
         
-        
+       
     }
     
     //MARK: - TabelView DataSource Methods
@@ -32,9 +32,11 @@ class CategoryListViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: "categoryCell", for: indexPath)
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
         
         cell.textLabel?.text = categories?[indexPath.row].name ?? "No Category Available"
+        
+        cell.backgroundColor = UIColor.init(hexString: categories?[indexPath.row].color ?? "#000000")
         
         return cell
         
@@ -77,6 +79,7 @@ class CategoryListViewController: UITableViewController {
             let category = Category()
             
             category.name = categoryTextField.text!
+            category.color = UIColor.hexValue(UIColor.randomFlat)()
             
             do{
                 try self.realm.write {
@@ -109,6 +112,24 @@ class CategoryListViewController: UITableViewController {
     {
         categories = realm.objects(Category.self)
         tableView.reloadData()
+    }
+    
+    override func deleteRow(indexPath: IndexPath) {
+        
+        if let item = self.categories?[indexPath.row]
+        {
+            do{
+                try self.realm.write {
+
+                    self.realm.delete(item)
+                }
+            }
+            catch
+            {
+                print("Error in saving done \(error)")
+            }
+        }
+        
     }
 }
 
