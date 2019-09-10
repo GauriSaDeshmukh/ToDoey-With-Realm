@@ -8,6 +8,7 @@
 
 import UIKit
 import RealmSwift
+import ChameleonFramework
 
 class CategoryListViewController: SwipeTableViewController {
     
@@ -20,7 +21,7 @@ class CategoryListViewController: SwipeTableViewController {
         
         loadCategories()
         
-       
+        
     }
     
     //MARK: - TabelView DataSource Methods
@@ -34,9 +35,22 @@ class CategoryListViewController: SwipeTableViewController {
         
         let cell = super.tableView(tableView, cellForRowAt: indexPath)
         
-        cell.textLabel?.text = categories?[indexPath.row].name ?? "No Category Available"
-        
-        cell.backgroundColor = UIColor.init(hexString: categories?[indexPath.row].color ?? "#000000")
+        if let category = categories?[indexPath.row]
+        {
+            
+            cell.textLabel?.text = category.name
+            
+            guard let categoryColor = UIColor(hexString: category.color) else{fatalError()}
+            
+            cell.textLabel?.textColor = ContrastColorOf(categoryColor, returnFlat: true)
+            
+            cell.backgroundColor = categoryColor
+            
+        }
+        else
+        {
+            cell.textLabel?.text = "No Category Added"
+        }
         
         return cell
         
@@ -44,11 +58,11 @@ class CategoryListViewController: SwipeTableViewController {
     
     //MARK: - TableView Delegate Methods
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-       
+        
         //if categories?.count != 0
         //{
-            performSegue(withIdentifier: "toDoItemList", sender: self)
-       // }
+        performSegue(withIdentifier: "toDoItemList", sender: self)
+        // }
         
     }
     
@@ -79,7 +93,7 @@ class CategoryListViewController: SwipeTableViewController {
             let category = Category()
             
             category.name = categoryTextField.text!
-            category.color = UIColor.hexValue(UIColor.randomFlat)()
+            category.color = UIColor.randomFlat.hexValue()
             
             do{
                 try self.realm.write {
@@ -89,7 +103,7 @@ class CategoryListViewController: SwipeTableViewController {
             catch{
                 print("Error \(error)")
             }
- 
+            
             self.tableView.reloadData()
             
         }
@@ -120,7 +134,7 @@ class CategoryListViewController: SwipeTableViewController {
         {
             do{
                 try self.realm.write {
-
+                    
                     self.realm.delete(item)
                 }
             }

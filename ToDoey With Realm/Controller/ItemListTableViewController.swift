@@ -8,12 +8,15 @@
 
 import UIKit
 import RealmSwift
-import SwipeCellKit
+import ChameleonFramework
 
-class ItemListTableViewController: UITableViewController {
+class ItemListTableViewController: SwipeTableViewController {
+    
+    @IBOutlet weak var iTemSearchBar: UISearchBar!
     
     let realm = try! Realm()
     var itemsObject: Results<Items>?
+    
     var selectedCategory: Category?
     {
         didSet
@@ -27,6 +30,32 @@ class ItemListTableViewController: UITableViewController {
         
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        
+        title = selectedCategory?.name
+        guard let category = selectedCategory?.color else{fatalError()}
+        updateNavBar(withHexCode: category)
+        
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        
+        updateNavBar(withHexCode: "1D9BF6")
+        
+    }
+    
+    //MARK: - Update Navigation Bar
+    func updateNavBar(withHexCode colorHexCode: String)
+    {
+        guard let navBar = navigationController?.navigationBar else{fatalError()}
+        guard let categoryColor = UIColor(hexString: colorHexCode) else {fatalError()}
+        
+        navBar.barTintColor = categoryColor
+        navBar.tintColor = ContrastColorOf(categoryColor, returnFlat: true)
+        navBar.largeTitleTextAttributes = [.foregroundColor : ContrastColorOf(categoryColor, returnFlat: true)]
+        iTemSearchBar.barTintColor = categoryColor
+    }
+    
     // MARK: - Tableview DataSource Methods
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         
@@ -35,20 +64,27 @@ class ItemListTableViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: "itemCell", for: indexPath) as! SwipeTableViewCell
-        
-        cell.delegate = self
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
         
         if let toDoItem = itemsObject?[indexPath.row]
         {
             cell.textLabel?.text = toDoItem.title
             
             cell.accessoryType = toDoItem.done ? .checkmark : .none
+            
+            if let categoryColor = UIColor(hexString: selectedCategory!.color)?.darken(byPercentage: CGFloat(indexPath.row) / CGFloat(itemsObject!.count))
+            {
+                cell.backgroundColor = categoryColor
+                
+                cell.textLabel?.textColor = ContrastColorOf(categoryColor, returnFlat: true)
+            }
+            
         }
         else
         {
-            cell.textLabel?.text = "No items added"
+            cell.textLabel?.text = "No Items Added"
         }
+        
         return cell
     }
     
@@ -121,9 +157,29 @@ class ItemListTableViewController: UITableViewController {
         tableView.reloadData()
     }
     
+    //MARK: - SwipeTableViewCotroller delegate Method
+    
+    override func deleteRow(indexPath: IndexPath) {
+        
+        if let item = self.itemsObject?[indexPath.row]
+        {
+            do{
+                try self.realm.write {
+                    
+                    self.realm.delete(item)
+                }
+            }
+            catch
+            {
+                print("Error in saving done \(error)")
+            }
+        }
+        
+    }
+    
 }
 
-extension ItemListTableViewController: UISearchBarDelegate, SwipeTableViewCellDelegate
+extension ItemListTableViewController: UISearchBarDelegate
 {
     
     //MARK: - SearchBar Mrthods
@@ -149,34 +205,5 @@ extension ItemListTableViewController: UISearchBarDelegate, SwipeTableViewCellDe
             }
         }
         
-    }
-    
-    //MARK:- SwipeTableViewCell Delegate Method
-    
-    func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath, for orientation: SwipeActionsOrientation) -> [SwipeAction]? {
-        guard orientation == .right else { return nil }
-        
-        let deleteAction = SwipeAction(style: .destructive, title: "Delete") { action, indexPath in
-            // handle action by updating model with deletion
-            if let item = self.itemsObject?[indexPath.row]
-            {
-                do{
-                    try self.realm.write {
-                        
-                        self.realm.delete(item)
-                    }
-                }
-                catch
-                {
-                    print("Error in saving done \(error)")
-                }
-            }
-            tableView.reloadData()
-        }
-        
-        // customize the action appearance
-        deleteAction.image = UIImage(named: "delete")
-        
-        return [deleteAction]
     }
 }

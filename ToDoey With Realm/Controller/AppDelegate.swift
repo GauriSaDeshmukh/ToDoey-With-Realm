@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import RealmSwift
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -16,21 +15,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        
-//        do{
-//        let realm = try Realm()
-//        
-//        realm.write {
-//            
-//            let catego
-//            realm.add("Hello")
-//            
-//        }
-//        }
-//        catch
-//        {
-//            print("Error \(error)")
-//        }
+
         return true
     }
 

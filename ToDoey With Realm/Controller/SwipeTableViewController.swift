@@ -11,10 +11,10 @@ import SwipeCellKit
 import ChameleonFramework
 
 class SwipeTableViewController: UITableViewController, SwipeTableViewCellDelegate {
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         tableView.rowHeight = 80
         tableView.separatorStyle = .none
     }
@@ -22,15 +22,13 @@ class SwipeTableViewController: UITableViewController, SwipeTableViewCellDelegat
     //MARK: - TableView DataSource Method
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-    
+        
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! SwipeTableViewCell
         
         cell.delegate = self
         
-        cell.backgroundColor = UIColor.randomFlat
-        
         return cell
-    
+        
     }
     
     
@@ -61,6 +59,6 @@ class SwipeTableViewController: UITableViewController, SwipeTableViewCellDelegat
     {
         
     }
-
+    
 }
 
